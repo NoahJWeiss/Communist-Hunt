@@ -13,6 +13,7 @@ import javax.imageio.*;
 import javax.swing.*;
 
 import java.util.ArrayList;
+import java.util.Random;
 import javax.swing.*;
 
 
@@ -25,6 +26,8 @@ public class Game extends JPanel implements ActionListener, MouseListener  {
    
    private Stalin stalin = null;
    private Stalin temp;
+   private Stalin communistBackground;
+   private Random r;
    
    private int score = 0;
    private int stalinX = 100;
@@ -38,24 +41,26 @@ public class Game extends JPanel implements ActionListener, MouseListener  {
    
    
    public Game(JFrame frame) {
-      Stalin stalin = new Stalin(100,100);
+      r = new Random();
+      Stalin stalin = new Stalin(100,100,"stalin.jpg");
+      communistBackground = new Stalin(0,0,"sovietflag.jpg");
       this.frame = frame;
       setBackground(Color.WHITE);     
       setFocusable(true);
       addMouseListener(this);
       Timer timer = new Timer(1000/60, this);
       timer.start();
-      for(int j= 0; j<9; j++) {
-      s.add(new Stalin(100 + 10*j,100 + 10 *j));
-      }
+      //for(int j= 0; j<9; j++) {
+      //s.add(new Stalin(100 + 10*j,100 + 10 *j));
+      //}
       }
 
    public void paintComponent(Graphics g) {
       super.paintComponent(g);
-      
       g.setColor(Color.GREEN);
       g.fillRect(0,250,1000,20);
       g.setColor(Color.BLUE);
+      communistBackground.render(g);
       for(int i = 0; i< s.size(); i++) {
          temp = s.get(i);
          temp.render(g);
@@ -69,6 +74,11 @@ public class Game extends JPanel implements ActionListener, MouseListener  {
    
    public void reset()  {
       
+      if(s.size()<=0) {
+      for(int j= 0; j<9; j++) {
+      s.add(new Stalin(r.nextInt(1280), r.nextInt(1040), "stalin.jpg"));
+      }
+     }
       for(int i = 0; i<s.size(); i++) {
          Stalin TempStalin = s.get(i);
          if(TempStalin.getX() >= 1000-160)

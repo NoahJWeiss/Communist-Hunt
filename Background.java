@@ -26,7 +26,7 @@ public class Background {
       frame.add(game, BorderLayout.CENTER);
       
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-      frame.setSize(1000, 300);
+      frame.setSize(1280, 1024);
       frame.setVisible(true);
    }
 }

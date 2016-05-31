@@ -11,9 +11,9 @@ public class Stalin {
    private int x,y;
    private BufferedImage image;
    
-   public Stalin(int x, int y) {
+   public Stalin(int x, int y, String fileLocation) {
       try {                
-          image = ImageIO.read(new File("/stalin.jpg"));
+          image = ImageIO.read(new File(fileLocation));
        } catch (IOException ex) {}
       this.x = x;
       this.y = y;
@@ -23,9 +23,6 @@ public class Stalin {
       this.x+= x;
       this.y+= y;
    }
-   
-   
-   
    public void render(Graphics g) {
       g.drawImage(image,x,y,null);
    }
