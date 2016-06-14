@@ -1,54 +1,32 @@
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.Graphics;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.image.BufferedImage;
 import java.awt.event.*;
-import java.awt.image.*;
-import java.io.*;
-import javax.imageio.*;
 import javax.swing.*;
-
 import java.util.ArrayList;
 import java.util.Random;
-import javax.swing.*;
-
-import java.io.*;
-import javax.swing.*;
-
-
 
 public class Game extends JPanel implements ActionListener, MouseListener, MouseMotionListener  {
    
    public ArrayList<Stalin> s = new ArrayList<Stalin>();
-   
-   
    private Stalin temp;
    private Stalin communistBackground;
    private Random r;
    private Menu menu = new Menu();
-   
-   private int test = 1;
    private int score = 0;
    private int stalinX = 100;
    private int stalinY = 100;
-   private int stalinYSpeed = -5;
-   private int stalinXSpeed = -5;
-   private int radius1 = 100;
-   private int radius2 = 175;
+   private int stalinYSpeed = 0;
+   private int stalinXSpeed = -7;
+   private int diameterX = 108;
+   private int diameterY = 152;
    
    public enum STATE {
-      Menu,
-      Game
-   };
+      Menu, Game;
+   }
    public STATE GameState = STATE.Game;
    
    public Game() {
       r = new Random();
-      Stalin stalin = new Stalin(100,100,"stalin.jpg");
       communistBackground = new Stalin(0,0,"sovietflag.jpg");
       setBackground(Color.WHITE);     
       setFocusable(true);
@@ -79,30 +57,33 @@ public class Game extends JPanel implements ActionListener, MouseListener, Mouse
    
    public void reset()  {
       if(GameState == STATE.Game) {
-         if(s.size()<=10) {
-            for(int j= s.size(); j<9; j++) {
-            /*try{
-               Thread.sleep(2500);
-            }
-            catch(Exception e) {
-            }
-            */
-               s.add(new Stalin(r.nextInt(1280), r.nextInt(1040-184), "stalin.jpg"));
+         if(s.size()<10) {
+            for(int j=s.size(); j<10; j++) {
+               s.add(new Stalin(1000, r.nextInt(1040-184), "stalin.png"));
+               if(r.nextInt(2)==1){
+                  stalinXSpeed *= -1;
+               }
             }
          }
          for(int i = 0; i<s.size(); i++) {
             Stalin TempStalin = s.get(i);
-            if(s.get(i).getX() >= 1280-160)
-               stalinXSpeed = -3;
-            else if(s.get(i).getX()<=0)
-               stalinXSpeed = 3;
-            if(s.get(i).getY() <= 0)
-               stalinYSpeed = 3;
-            else if(s.get(i).getY() >= 1040-184)
-               stalinYSpeed =-3;
-            s.get(i).changeCoordinates(stalinXSpeed,stalinYSpeed);
-            stalinX+=stalinXSpeed;
-            stalinY+= stalinYSpeed;
+            if(s.get(i).getX() >= 1280-108){
+               killStalin(TempStalin);
+               Background.score();
+            }
+            else if(s.get(i).getX()<=0){
+               killStalin(TempStalin);
+               Background.score();
+            }
+            if(s.get(i).getY() <=0){
+               killStalin(TempStalin);
+               Background.score();
+            }
+            else if(s.get(i).getY() >= 1040-152){
+               killStalin(TempStalin);
+               Background.score();
+            }
+            TempStalin.changeCoordinates(stalinXSpeed,stalinYSpeed);
          }
       }
    }
@@ -112,7 +93,7 @@ public class Game extends JPanel implements ActionListener, MouseListener, Mouse
       if(GameState == STATE.Game) {
          for(int i = 0; i<s.size(); i++) {
             Stalin TempStalin = s.get(i);
-            if(e.getX() >= TempStalin.getX() && e.getX() <= TempStalin.getX() + radius1 && e.getY() >= TempStalin.getY() && e.getY() <= TempStalin.getY() + radius2 ) {
+            if(e.getX() >= TempStalin.getX() && e.getX() <= TempStalin.getX() + diameterX && e.getY() >= TempStalin.getY() && e.getY() <= TempStalin.getY() + diameterY ) {
                killStalin(TempStalin);
                Background.score();
                score = Background.getScore();
