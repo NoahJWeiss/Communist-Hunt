@@ -13,77 +13,206 @@ import javax.imageio.*;
 import javax.swing.*;
 
 import java.util.ArrayList;
+import java.util.Random;
 import javax.swing.*;
 
+import java.io.*;
+import javax.swing.*;
+
+/**
+ * Game.java
+ * Assignment: Communist Hunt
+ * Purpose: To create a simple Duck Hunt game  
+ * @version 6/20/2016
+ * @authors Griffin Craft, Cooper Chia, Noah Weiss
+ */
 
 
-public class Game extends JPanel implements ActionListener{
+public class Game extends JPanel implements ActionListener, MouseListener,MouseMotionListener, KeyListener  {
    
    public ArrayList<Stalin> s = new ArrayList<Stalin>();
-   public JFrame frame;
-   public BufferedImage img;
-
-   private Stalin stalin = null;
    private Stalin temp;
+   private Stalin communistBackground;
+   private Random r;
+   private Menu menu;
+   private int ammo = 6;
+   private int score = 0;
+   private int width = 108;
+   private int height = 152;
+   private JMenuBar bar;
+   private JMenu jmenu;
+   private int count;
+
    
-   private Graphics g;
-   private int stalinX = 100;
-   private int stalinY = 100;
-   private int stalinYSpeed = -3;
-   private int stalinXSpeed = -3;
+   public enum STATE {
+      Menu,
+      Game
+   };
+   public STATE GameState = STATE.Game;
    
-   private Gun gun;
-   
-   
-   public Game(JFrame frame) throws IOException {
-      setBackground(Color.WHITE);
-      this.frame = frame;
-      stalin = new Stalin(stalinX, stalinY);     
-      Stalin stalin2 = new Stalin(stalinX + 100, stalinY - 40);
-      gun = new Gun(stalin, frame);
-      //gun.mouseMoved();
+   //Constructor that creates the menu, random object, background, and the end screen
+   public Game(JFrame frame) {
+      Background.changeAmmo(6);
+      Background.score(score);
+      menu = new Menu();
+      r = new Random();
+      communistBackground = new Stalin(0,0,0,"sovietflag.jpg",true);
+      setBackground(Color.WHITE);     
+      setFocusable(true);
+      addMouseListener(this);
+      addKeyListener(this);
       Timer timer = new Timer(1000/60, this);
       timer.start();
-      }
- 
-    public void paintComponent(Graphics g){
-      
-      super.paintComponent(g);
-      g.setColor(Color.GREEN);
-      g.fillRect(0,250,1000,20);
-      g.setColor(Color.BLUE);
-      for(int i = 0; i< s.size(); i++) {
-         temp = s.get(i);
-         temp.render(g);
-      }
-      repaint();
+      bar = new JMenuBar();
+      jmenu = new JMenu("Options");
+      JMenuItem jmExit = new JMenuItem("Exit");
+      JMenuItem jmRules = new JMenuItem("Rules");
+      JMenuItem jmClose = new JMenuItem("Close");
+      JMenuItem jmPause = new JMenuItem("Pause");
+      JMenuItem jmNewGame = new JMenuItem("New Game");
+      jmenu.add(jmClose);
+      jmenu.add(jmPause);
+      jmenu.add(jmNewGame);
+      jmenu.add(jmRules);
+      jmenu.add(jmExit);
+      bar.add(jmenu);
+      jmExit.addActionListener(new ExitListener());
+      jmClose.addActionListener(this);
+      jmRules.addActionListener(new RulesListener());
+      jmNewGame.addActionListener(new GameListener());
+      frame.setJMenuBar(bar); 
+
    }
    
+   //Paints all the stuff onto the screen
+   public void paintComponent(Graphics g) {
+      super.paintComponent(g);
+      //end state to the game
+      if(score==10){
+         menu.render(g,accuracy());
+      }
+      //draws the stalins onto the screen
+      else if(GameState == STATE.Game){
+         g.setColor(Color.BLACK);
+         communistBackground.render(g);
+         for(int i = 0; i< s.size(); i++) {
+            temp = s.get(i);
+            temp.render(g);
+         }
+         repaint();
+      }
+   }
+   
+   //Makes the game have animation 
    public void actionPerformed(ActionEvent e) {
       reset();
    }
    
-   public void reset() {
-      for(int i = 0; i<s.size(); i++) {
-      Stalin TempStalin = s.get(i);
-      if(stalinX >= 1000-160)
-         stalinXSpeed = -3;
-      else if(stalinX<=0)
-         stalinXSpeed = 3;
-      if(stalinY <= 0)
-         stalinYSpeed = 3;
-      else if(stalinY >= 250-184)
-         stalinYSpeed =-3;
-      stalinY+=stalinYSpeed;
-      stalinX+=stalinXSpeed;
-      TempStalin.changeCoordinates(stalinXSpeed,stalinYSpeed);
-     }
+   //Stalin AI method that resets the screen
+   public void reset()  {
+      int start = 10;
+      boolean positive = true;
+      if(GameState == STATE.Game) {
+         if(s.size()<=5) {
+            for(int j= s.size(); j<5; j++) {
+            if((r.nextInt(10))%2 == 0){
+            start = 1270;
+            positive = false;
+            }
+               Stalin ten = new Stalin(start, r.nextInt(1040-184),r.nextInt(5) + 3, "stalin.png",positive);
+               s.add(ten);   
+            }
+         }
+         /*
+             AI segment, that dictates a movement patern for the Stalin's
+         */
+         for(int i = 0; i<s.size();i++) {
+            Stalin TempStalin = s.get(i);
+            if(TempStalin.getX() >= 1280){
+
+               killStalin(TempStalin);
+               }
+            else if(TempStalin.getX()<=0){
+
+               killStalin(TempStalin);
+               }
+            if(TempStalin.getY() <= 0){
+
+               killStalin(TempStalin);
+               }
+            else if(TempStalin.getY() >= 1000){
+
+               killStalin(TempStalin);
+               }
+            TempStalin.speed();
+           }
+      }
    }
    
-    public void addStalin(Stalin boo) {
+   //Registers if the mouse is clicked
+   public void mouseClicked(MouseEvent e) {
+      Background.changeAmmo(ammo-1);
+      ammo--;
+      count++;
+      for(int i = 0; i<s.size(); i++) {
+            Stalin TempStalin = s.get(i);
+            if(e.getX() >= TempStalin.getX() - TempStalin.getSpeed() && e.getX() <= TempStalin.getX() + width + TempStalin.getSpeed() && e.getY() >= TempStalin.getY() - TempStalin.getYSpeed() && e.getY() <= TempStalin.getY() + height + TempStalin.getSpeed() && ammo > 0) {
+               killStalin(TempStalin);
+               score++;
+               Background.score(score);
+            }
+         }
+      }
+   //computes the users accuracy and returns a double value
+   public double accuracy(){
+      double accuracy = (double)score/count;
+      if(accuracy>1){
+         accuracy = 1;
+      }
+      return accuracy*100;
+   }
+   
+   
+   public void mouseEntered(MouseEvent e) {
+   
+   }
+   public void mouseExited(MouseEvent e) {
+   
+   }
+   public void mousePressed(MouseEvent e) {
+   
+   }
+   public void mouseReleased(MouseEvent e) {
+   
+   }
+   public void mouseDragged(MouseEvent e) {                      
+   
+   }
+   public void mouseMoved(MouseEvent e) {
+                                                                                                                           
+   }
+   public void keyTyped(KeyEvent e) {
+      
+   }
+   
+   //Registers if the R key is typed
+   public void keyPressed(KeyEvent e) {
+      if(e.getKeyCode() == KeyEvent.VK_R) {
+         ammo = 6;
+         Background.changeAmmo(6);
+      }
+   }
+   public void keyReleased(KeyEvent e) {
+   
+   }
+   
+   //Add's a Stalin to the screen
+   public void addStalin(Stalin boo) {
       s.add(boo);
    }
+   
+   //Removes a Stalin from the screen 
    public void killStalin(Stalin boo) {
       s.remove(boo);   
    }
- }
+}
