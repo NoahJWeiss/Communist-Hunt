@@ -1,3 +1,5 @@
 Our code is run from the background class. Background calls the game class which does most of the stuff that you will see in the game.
 we use a couple different listeners to allow our menu to work. The stalin class creates the images that are meant to be shot. for our
 end game we have a class that writes over the curretn JFrame and ends the game showing accuracy.
+
+Press "R" to  reload whem you have 0 ammo. The ammo counter is on the lefthand side of the screen.
