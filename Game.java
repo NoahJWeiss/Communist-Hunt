@@ -16,38 +16,49 @@ import java.util.ArrayList;
 import java.util.Random;
 import javax.swing.*;
 
+import java.awt.*;
 import java.io.*;
 import javax.swing.*;
 
+/**
+ * Game.java
+ * Assignment: Communist Hunt
+ * Purpose: To create a simple Duck Hunt game  
+ * @version 6/20/2016
+ * @authors Griffin Craft, Cooper Chia, Noah Weiss
+ */
 
-
-public class Game extends JPanel implements ActionListener, MouseListener,MouseMotionListener, KeyListener  {
+public class Game extends JPanel implements ActionListener, MouseListener, KeyListener {
    
    public ArrayList<Stalin> s = new ArrayList<Stalin>();
+   
+   
    private Stalin temp;
    private Stalin communistBackground;
    private Random r;
    private Menu menu;
+   
+
    private int ammo = 6;
+   private int test = 1;
    private int score = 0;
-   private int radius1 = 108;
+   private int stalinX = 100;
+   private int stalinY = 100;
+   private int stalinYSpeed = -1;
+   private int stalinXSpeed = -5;
+   private int width = 108;
    private int radius2 = 152;
    private JMenuBar bar;
    private JMenu jmenu;
-   private int count;
-
+   private boolean playingGame = true;
    
-   public enum STATE {
-      Menu,
-      Game
-   };
-   public STATE GameState = STATE.Game;
-   
-   public Game(JFrame frame) {
-      Background.score(score);
-      menu = new Menu();
+   //Constructor that creates the menu, random object, background, and the end screen
+   public Game(JFrame frame) { 
+      Background.changeAmmo(6);
+      menu = new Menu(frame);
       r = new Random();
-      communistBackground = new Stalin(0,0,0,"sovietflag.jpg",true);
+      Background.score(score);
+      communistBackground = new Stalin(0,0,"sovietflag.jpg");
       setBackground(Color.WHITE);     
       setFocusable(true);
       addMouseListener(this);
@@ -59,10 +70,8 @@ public class Game extends JPanel implements ActionListener, MouseListener,MouseM
       JMenuItem jmExit = new JMenuItem("Exit");
       JMenuItem jmRules = new JMenuItem("Rules");
       JMenuItem jmClose = new JMenuItem("Close");
-      JMenuItem jmPause = new JMenuItem("Pause");
       JMenuItem jmNewGame = new JMenuItem("New Game");
       jmenu.add(jmClose);
-      jmenu.add(jmPause);
       jmenu.add(jmNewGame);
       jmenu.add(jmRules);
       jmenu.add(jmExit);
@@ -72,92 +81,80 @@ public class Game extends JPanel implements ActionListener, MouseListener,MouseM
       jmRules.addActionListener(new RulesListener());
       jmNewGame.addActionListener(new GameListener());
       frame.setJMenuBar(bar); 
-
+   
    }
-
+   //Paints all the stuff onto the screen
    public void paintComponent(Graphics g) {
       super.paintComponent(g);
-      if(score==10){
-         menu.render(g,accuracy());
+      //end state to the game
+      if(score>=10){
+         menu.render(g);
       }
-      else if(GameState == STATE.Game){
+      //draws the stalins onto the screen
+      else
+      {
          g.setColor(Color.BLACK);
          communistBackground.render(g);
          for(int i = 0; i< s.size(); i++) {
             temp = s.get(i);
             temp.render(g);
          }
-         repaint();
+         if(ammo == 0) {
+            Font fnt0 = new Font("helvetica", Font.BOLD, 50);
+            g.setFont(fnt0);
+            g.setColor(Color.BLUE);
+            g.drawString("Reload! Press R!", 350, 600);
+         }
       }
+     
+      repaint();
    }
-   
+    //Makes the game have animation 
    public void actionPerformed(ActionEvent e) {
       reset();
    }
-   
+   //Stalin AI method that resets the screen
    public void reset()  {
-      int start = 10;
-      boolean positive = true;
-      if(GameState == STATE.Game) {
-         if(s.size()<=5) {
-            for(int j= s.size(); j<5; j++) {
-            /*try{
-               Thread.sleep(2500);
-            }
-            catch(Exception e) {
-            }
-            */
-            if((r.nextInt(10))%2 == 0){
-            start = 1270;
-            positive = false;
-            }
-               Stalin ten = new Stalin(start, r.nextInt(1040-184),r.nextInt(5) + 3, "stalin.png",positive);
-               s.add(ten);   
-            }
+      int start = 0;
+   
+      if(s.size()<=7 && score < 92) {
+         for(int j= s.size(); j<7; j++) {
+            if(r.nextInt(100)%2 ==0)
+               start = 1280;
+            s.add(new Stalin(0, r.nextInt(1040-184), "stalin.png"));
          }
-         for(int i = 0; i<s.size();i++) {
-            Stalin TempStalin = s.get(i);
-            if(TempStalin.getX() >= 1280){
-
-               killStalin(TempStalin);
-               }
-            else if(TempStalin.getX()<=0){
-
-               killStalin(TempStalin);
-               }
-            if(TempStalin.getY() <= 0){
-
-               killStalin(TempStalin);
-               }
-            else if(TempStalin.getY() >= 1000){
-
-               killStalin(TempStalin);
-               }
-            TempStalin.speed();
-           }
+      }
+      /*
+      AI segment, that dictates a movement patern for the Stalin's
+      */
+      for(int i = 0; i<s.size(); i++) {
+         Stalin TempStalin = s.get(i);
+         if(s.get(i).getX() >= 1280-160)
+            stalinXSpeed = -3;
+         else if(s.get(i).getX()<=0)
+            stalinXSpeed = 3;
+         if(s.get(i).getY() <= 0)
+            stalinYSpeed = 3;
+         else if(s.get(i).getY() >= 1040-184)
+            stalinYSpeed =-3;
+         s.get(i).changeCoordinates(stalinXSpeed,stalinYSpeed);
+      
       }
    }
+   //Registers if the mouse is clicked
    public void mouseClicked(MouseEvent e) {
       Background.changeAmmo(ammo-1);
       ammo--;
-      count++;
+      System.out.println(ammo);
       for(int i = 0; i<s.size(); i++) {
-            Stalin TempStalin = s.get(i);
-            if(e.getX() >= TempStalin.getX() - TempStalin.getSpeed() && e.getX() <= TempStalin.getX() + radius1 + TempStalin.getSpeed() && e.getY() >= TempStalin.getY() - TempStalin.getYSpeed() && e.getY() <= TempStalin.getY() + radius2 + TempStalin.getSpeed() && ammo > 0) {
-               killStalin(TempStalin);
-               score++;
-               Background.score(score);
-            }
+         Stalin TempStalin = s.get(i);
+         if(e.getX() >= TempStalin.getX() && e.getX() <= TempStalin.getX() + width && e.getY() >= TempStalin.getY() && e.getY() <= TempStalin.getY() + radius2 && ammo > 0) {
+            killStalin(TempStalin);
+            score++;
+            Background.score(score);
          }
       }
-      public double accuracy(){
-      double accuracy = (double)score/count;
-      if(accuracy>1){
-         accuracy = 1;
-      }
-      return accuracy*100;
    }
-
    public void mouseEntered(MouseEvent e) {
    
    }
@@ -170,15 +167,10 @@ public class Game extends JPanel implements ActionListener, MouseListener,MouseM
    public void mouseReleased(MouseEvent e) {
    
    }
-   public void mouseDragged(MouseEvent e) {                      
-   
-   }
-   public void mouseMoved(MouseEvent e) {
-                                                                                                                           
-   }
    public void keyTyped(KeyEvent e) {
       
    }
+   //Registers if the R key is typed
    public void keyPressed(KeyEvent e) {
       if(e.getKeyCode() == KeyEvent.VK_R) {
          ammo = 6;
@@ -188,10 +180,11 @@ public class Game extends JPanel implements ActionListener, MouseListener,MouseM
    public void keyReleased(KeyEvent e) {
    
    }
-
+   //Add's a Stalin to the screen
    public void addStalin(Stalin boo) {
       s.add(boo);
    }
+   //Removes a Stalin from the screen 
    public void killStalin(Stalin boo) {
       s.remove(boo);   
    }
