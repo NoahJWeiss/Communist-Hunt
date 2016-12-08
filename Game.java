@@ -11,6 +11,8 @@ import java.awt.image.*;
 import java.io.*;
 import javax.imageio.*;
 import javax.swing.*;
+import java.awt.Toolkit;
+
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -66,22 +68,27 @@ public class Game extends JPanel implements ActionListener, MouseListener,MouseM
       bar = new JMenuBar();
       jmenu = new JMenu("Options");
       JMenuItem jmExit = new JMenuItem("Exit");
-      JMenuItem jmRules = new JMenuItem("Rules");
+      jmExit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0));
+      JMenuItem jmStory = new JMenuItem("Story");
+      jmStory.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, 0));
       JMenuItem jmClose = new JMenuItem("Close");
-      JMenuItem jmPause = new JMenuItem("Pause");
       JMenuItem jmNewGame = new JMenuItem("New Game");
+      jmNewGame.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, 0));
+      JMenuItem jmRules = new JMenuItem("Rules");
+      jmRules.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, 0));
       jmenu.add(jmClose);
-      jmenu.add(jmPause);
       jmenu.add(jmNewGame);
       jmenu.add(jmRules);
       jmenu.add(jmExit);
+      jmenu.add(jmStory);
       bar.add(jmenu);
       jmExit.addActionListener(new ExitListener());
       jmClose.addActionListener(this);
-      jmRules.addActionListener(new RulesListener());
+      jmStory.addActionListener(new StoryListener());
       jmNewGame.addActionListener(new GameListener());
+      jmRules.addActionListener(new  RulesListener());
       frame.setJMenuBar(bar); 
-
+   
    }
    
    //Paints all the stuff onto the screen
@@ -115,10 +122,10 @@ public class Game extends JPanel implements ActionListener, MouseListener,MouseM
       if(GameState == STATE.Game) {
          if(s.size()<=5) {
             for(int j= s.size(); j<5; j++) {
-            if((r.nextInt(10))%2 == 0){
-            start = 1270;
-            positive = false;
-            }
+               if((r.nextInt(10))%2 == 0){
+                  start = 1270;
+                  positive = false;
+               }
                Stalin ten = new Stalin(start, r.nextInt(1040-184),r.nextInt(5) + 3, "stalin.png",positive);
                s.add(ten);   
             }
@@ -129,23 +136,23 @@ public class Game extends JPanel implements ActionListener, MouseListener,MouseM
          for(int i = 0; i<s.size();i++) {
             Stalin TempStalin = s.get(i);
             if(TempStalin.getX() >= 1280){
-
+            
                killStalin(TempStalin);
-               }
+            }
             else if(TempStalin.getX()<=0){
-
+            
                killStalin(TempStalin);
-               }
+            }
             if(TempStalin.getY() <= 0){
-
+            
                killStalin(TempStalin);
-               }
+            }
             else if(TempStalin.getY() >= 1000){
-
+            
                killStalin(TempStalin);
-               }
+            }
             TempStalin.speed();
-           }
+         }
       }
    }
    
@@ -155,14 +162,14 @@ public class Game extends JPanel implements ActionListener, MouseListener,MouseM
       ammo--;
       count++;
       for(int i = 0; i<s.size(); i++) {
-            Stalin TempStalin = s.get(i);
-            if(e.getX() >= TempStalin.getX() - TempStalin.getSpeed() && e.getX() <= TempStalin.getX() + width + TempStalin.getSpeed() && e.getY() >= TempStalin.getY() - TempStalin.getYSpeed() && e.getY() <= TempStalin.getY() + height + TempStalin.getSpeed() && ammo > 0) {
-               killStalin(TempStalin);
-               score++;
-               Background.score(score);
-            }
+         Stalin TempStalin = s.get(i);
+         if(e.getX() >= TempStalin.getX() - TempStalin.getSpeed() && e.getX() <= TempStalin.getX() + width + TempStalin.getSpeed() && e.getY() >= TempStalin.getY() - TempStalin.getYSpeed() && e.getY() <= TempStalin.getY() + height + TempStalin.getSpeed() && ammo > 0) {
+            killStalin(TempStalin);
+            score++;
+            Background.score(score);
          }
       }
+   }
    //computes the users accuracy and returns a double value
    public double accuracy(){
       double accuracy = (double)score/count;
