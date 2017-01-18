@@ -36,7 +36,8 @@ public class Background {
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       frame.setSize(1280, 1024);
       frame.setVisible(true);
-   }
+      SoundThread.play("USSR.wav");
+      }
    
    //Updates the score counter in the jframe.
    public static void score(int score) {
@@ -56,5 +57,6 @@ public class Background {
       else
       label2.setText(String.valueOf(0));
    }
-
-}
+   
+  }
+ 

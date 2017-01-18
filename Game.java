@@ -11,8 +11,6 @@ import java.awt.image.*;
 import java.io.*;
 import javax.imageio.*;
 import javax.swing.*;
-import java.awt.Toolkit;
-
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -44,7 +42,6 @@ public class Game extends JPanel implements ActionListener, MouseListener,MouseM
    private JMenuBar bar;
    private JMenu jmenu;
    private int count;
-
    
    public enum STATE {
       Menu,
@@ -222,4 +219,5 @@ public class Game extends JPanel implements ActionListener, MouseListener,MouseM
    public void killStalin(Stalin boo) {
       s.remove(boo);   
    }
+  
 }
